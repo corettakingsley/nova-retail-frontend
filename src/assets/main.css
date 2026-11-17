@@ -1,0 +1,67 @@
+
+/* =================================
+   NOVA RETAIL — DESIGN FOUNDATION
+================================= */
+
+:root {
+  font-family: Inter, Arial, sans-serif;
+  color: #172033;
+  background: #f8fafc;
+
+  /* Brand colours */
+  --color-primary: #14243a;
+  --color-primary-light: #203b5c;
+  --color-accent: #16a6a0;
+
+  /* Backgrounds */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+
+  /* Text */
+  --color-text: #172033;
+  --color-muted: #64748b;
+
+  /* Borders and effects */
+  --color-border: #e2e8f0;
+  --shadow-card: 0 4px 16px rgba(20, 36, 58, 0.06);
+
+  /* Layout */
+  --content-width: 1200px;
+  --radius-medium: 10px;
+}
+
+/* Reset */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
