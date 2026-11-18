@@ -1,11 +1,15 @@
 
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ProductCard from '@/components/ProductCard.vue'
-import { products } from '@/services/products'
+import { getProducts, type Product } from '@/services/products'
 
+const products = ref<Product[]>([])
 const searchQuery = ref('')
+const selectedCategory = ref('All Products')
+const loading = ref(true)
+const error = ref('')
 
 const categories = [
   'All Products',
@@ -14,10 +18,8 @@ const categories = [
   'Lifestyle',
 ]
 
-const selectedCategory = ref('All Products')
-
 const filteredProducts = computed(() => {
-  return products.filter((product) => {
+  return products.value.filter((product) => {
     const matchesCategory =
       selectedCategory.value === 'All Products' ||
       product.category === selectedCategory.value
@@ -29,7 +31,23 @@ const filteredProducts = computed(() => {
     return matchesCategory && matchesSearch
   })
 })
+
+async function loadProducts() {
+  try {
+    loading.value = true
+    error.value = ''
+    products.value = await getProducts()
+  } catch (err) {
+    console.error('Failed to load products:', err)
+    error.value = 'Unable to load products. Please try again later.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadProducts)
 </script>
+
 
 <template>
   <section class="products-page">
@@ -63,22 +81,33 @@ const filteredProducts = computed(() => {
     </div>
     
     
-    <div v-if="filteredProducts.length > 0" class="product-grid">
-      <ProductCard
-        v-for="product in filteredProducts"
-        :key="product.id"
-        :id="product.id"
-        :name="product.name"
-        :category="product.category"
-        :price="product.price"
-        :description="product.description"
-      />
-    </div>
+    <div v-if="loading" class="empty-state">
+  <p>Loading products...</p>
+</div>
 
-    <div v-else class="empty-state">
-      <h2>No products found</h2>
-      <p>Try another search term or select a different category.</p>
-    </div>
+<div v-else-if="error" class="empty-state">
+  <p>{{ error }}</p>
+  <button type="button" @click="loadProducts">
+    Try Again
+  </button>
+</div>
+
+<div v-else-if="filteredProducts.length > 0" class="product-grid">
+  <ProductCard
+    v-for="product in filteredProducts"
+    :key="product.id"
+    :id="product.id"
+    :name="product.name"
+    :category="product.category"
+    :price="product.price"
+    :description="product.description"
+  />
+</div>
+
+<div v-else class="empty-state">
+  <h2>No products found</h2>
+  <p>Try another search term or select a different category.</p>
+</div>
 
   </section>
 </template>

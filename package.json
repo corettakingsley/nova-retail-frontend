@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "run-p type-check \"build-only {@}\" --",
-  "preview": "vite preview",
-  "build-only": "vite build",
-  "type-check": "vue-tsc --build",
-  "test": "vitest"
-},
-
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "test": "vitest"
+  },
   "dependencies": {
+    "axios": "^1.21.1",
     "pinia": "^4.1.0",
     "vue": "^3.5.42",
     "vue-router": "^5.5.1"

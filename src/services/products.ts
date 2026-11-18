@@ -1,4 +1,23 @@
+import api from './api'
 
+export interface ProductResponse {
+  id: number
+  name: string
+  description: string | null
+  price: number
+  stock_quantity: number
+  category_id: number | null
+  image_url: string | null
+  is_active: boolean
+}
+
+export interface CategoryResponse {
+  id: number
+  name: string
+  description: string | null
+}
+
+// Frontend product structure
 export interface Product {
   id: number
   name: string
@@ -7,47 +26,49 @@ export interface Product {
   description: string
 }
 
-export const products: Product[] = [
-  {
-    id: 1,
-    name: 'Wireless Headphones',
-    category: 'Electronics',
-    price: 899,
-    description: 'Enjoy immersive sound and everyday comfort.',
-  },
-  {
-    id: 2,
-    name: 'Smart Watch',
-    category: 'Accessories',
-    price: 1299,
-    description: 'Stay connected and keep track of your day.',
-  },
-  {
-    id: 3,
-    name: 'Travel Backpack',
-    category: 'Lifestyle',
-    price: 649,
-    description: 'A practical companion for work and travel.',
-  },
-  {
-    id: 4,
-    name: 'Bluetooth Speaker',
-    category: 'Electronics',
-    price: 749,
-    description: 'Bring your favourite music wherever you go.',
-  },
-  {
-    id: 5,
-    name: 'Classic Wrist Watch',
-    category: 'Accessories',
-    price: 999,
-    description: 'A timeless design for everyday style.',
-  },
-  {
-    id: 6,
-    name: 'Laptop Backpack',
-    category: 'Lifestyle',
-    price: 799,
-    description: 'Carry your essentials comfortably and securely.',
-  },
-]
+// Retrieve all active products
+export async function getProducts(): Promise<Product[]> {
+  const response = await api.get<ProductResponse[]>('/api/products/')
+
+  const categoriesResponse = await api.get<CategoryResponse[]>('/api/categories/')
+
+  const categories = categoriesResponse.data
+
+  return response.data.map((product) => ({
+    id: product.id,
+    name: product.name,
+    category:
+      categories.find((category) => category.id === product.category_id)?.name
+      ?? 'Uncategorised',
+    price: Number(product.price),
+    description: product.description ?? '',
+  }))
+}
+
+// Retrieve one active product
+export async function getProduct(productId: number): Promise<Product> {
+  const response = await api.get<ProductResponse>(
+    `/api/products/${productId}`,
+  )
+
+  const product = response.data
+
+  let category = 'Uncategorised'
+
+  if (product.category_id !== null) {
+    const categoriesResponse = await api.get<CategoryResponse[]>('/api/categories/')
+
+    category =
+      categoriesResponse.data.find(
+        (item) => item.id === product.category_id,
+      )?.name ?? 'Uncategorised'
+  }
+
+  return {
+    id: product.id,
+    name: product.name,
+    category,
+    price: Number(product.price),
+    description: product.description ?? '',
+  }
+}

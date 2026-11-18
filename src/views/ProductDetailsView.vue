@@ -1,9 +1,10 @@
 
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import axios from 'axios'
 import { useRoute, RouterLink } from 'vue-router'
-import { products } from '@/services/products'
+import { getProduct, type Product } from '@/services/products'
 import { useCartStore } from '@/stores/cart'
 
 const route = useRoute()
@@ -11,11 +12,30 @@ const cartStore = useCartStore()
 
 const quantity = ref(1)
 
-const product = computed(() => {
-  return products.find(
-    (item) => item.id === Number(route.params.id)
-  )
-})
+const product = ref<Product | null>(null)
+const loading = ref(true)
+const error = ref('')
+
+async function loadProduct() {
+  try {
+    loading.value = true
+    error.value = ''
+
+    product.value = await getProduct(Number(route.params.id))
+  } catch (err) {
+  console.error('Failed to load product:', err)
+
+  if (axios.isAxiosError(err) && err.response?.status === 404) {
+    error.value = 'Product not found. It may have been removed.'
+  } else {
+    error.value = 'Unable to load this product. Please try again later.'
+  }
+  }
+ loading.value = false
+  }
+
+
+onMounted(loadProduct)
 
 function addProductToCart() {
   if (!product.value) return
@@ -33,7 +53,19 @@ function addProductToCart() {
       ← Back to Products
     </RouterLink>
 
-    <div v-if="product" class="details-container">
+    <div v-if="loading" class="not-found">
+  <p>Loading product...</p>
+</div>
+
+<div v-else-if="error" class="not-found">
+  <h1>Unable to load product</h1>
+  <p>{{ error }}</p>
+  <button type="button" @click="loadProduct">
+    Try Again
+  </button>
+</div>
+
+<div v-else-if="product" class="details-container">
       <div class="product-image">
         <span class="image-placeholder">N</span>
       </div>

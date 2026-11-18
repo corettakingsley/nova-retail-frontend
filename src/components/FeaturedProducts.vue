@@ -1,30 +1,29 @@
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import ProductCard from './ProductCard.vue'
+import { getProducts, type Product } from '@/services/products'
 
-const products = [
-  {
-    id: 1,
-    name: 'Wireless Headphones',
-    category: 'Electronics',
-    price: 899.00,
-    description: 'Enjoy immersive sound and everyday comfort.',
-  },
-  {
-    id: 2,
-    name: 'Smart Watch',
-    category: 'Accessories',
-    price: 1299.00,
-    description: 'Stay connected and keep track of your day.',
-  },
-  {
-    id: 3,
-    name: 'Travel Backpack',
-    category: 'Lifestyle',
-    price: 649.00,
-    description: 'A practical companion for work and travel.',
-  },
-]
+const products = ref<Product[]>([])
+const loading = ref(true)
+const error = ref('')
+
+async function loadProducts() {
+  try {
+    loading.value = true
+    error.value = ''
+
+    const allProducts = await getProducts()
+    products.value = allProducts.slice(0, 3)
+  } catch (err) {
+    console.error('Failed to load featured products:', err)
+    error.value = 'Unable to load featured products.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadProducts)
 </script>
 
 <template>
@@ -41,17 +40,25 @@ const products = [
       </RouterLink>
     </div>
 
-    <div class="product-grid">
-      <ProductCard
-        v-for="product in products"
-        :key="product.id"
-        :id="product.id"
-        :name="product.name"
-        :category="product.category"
-        :price="product.price"
-        :description="product.description"
-      />
-    </div>
+    <div v-if="loading" class="product-grid">
+  <p>Loading featured products...</p>
+</div>
+
+<div v-else-if="error" class="product-grid">
+  <p>{{ error }}</p>
+</div>
+
+<div v-else class="product-grid">
+  <ProductCard
+    v-for="product in products"
+    :key="product.id"
+    :id="product.id"
+    :name="product.name"
+    :category="product.category"
+    :price="product.price"
+    :description="product.description"
+  />
+</div>
   </section>
 </template>
 
